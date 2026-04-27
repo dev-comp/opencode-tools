@@ -4,10 +4,10 @@ MCP servers for OpenCode (formerly opencode-dev/opencode) that provide access to
 
 ## Features
 
-- **20 tools** across 2 MCP servers (13 Atlassian, 7 GitHub)
-- **Private by design** — secrets stored in a local env file, never committed
-- **Global installation** — one config entry, available across all projects
-- **Zero external dependencies** — uses only Python stdlib + `mcp` + `requests`
+- **23 tools** across 2 MCP servers (13 Atlassian, 10 GitHub)
+- **Private by design** -- secrets stored in a local env file, never committed
+- **Global installation** -- one config entry, available across all projects
+- **Zero external dependencies** -- uses only Python stdlib + `mcp` + `requests`
 
 ## Quick Start
 
@@ -17,39 +17,41 @@ MCP servers for OpenCode (formerly opencode-dev/opencode) that provide access to
 4. Add servers to `~/.config/opencode/config.json`
 5. Restart OpenCode
 
-See the full guide: https://pshapoval.atlassian.net/wiki/spaces/KB/pages/241926146/Connect+OpenCode+to+Atlassian+Cloud
+See the full how-to guide: https://pshapoval.atlassian.net/wiki/spaces/KB/pages/241926146/Connect+OpenCode+to+GitHub+and+Atlassian
 
 ## Available Tools
 
 ### Atlassian MCP (13 tools)
 
 **Confluence** (7 tools):
-- `confluence_search_pages` — search pages by query, space, or label
-- `confluence_get_page` — read page content by ID
-- `confluence_get_page_children` — list child pages
-- `confluence_create_page` — create a new page
-- `confluence_update_page` — update an existing page
-- `confluence_list_spaces` — list all spaces
-- `confluence_get_space` — get space details
+- `confluence_search_pages` -- search pages by query, space, or label
+- `confluence_get_page` -- read page content by ID
+- `confluence_get_page_children` -- list child pages
+- `confluence_create_page` -- create a new page
+- `confluence_update_page` -- update an existing page
+- `confluence_list_spaces` -- list all spaces
+- `confluence_get_space` -- get space details
 
 **Jira** (6 tools):
-- `jira_search_issues` — search issues via JQL
-- `jira_get_issue` — get issue details by key
-- `jira_create_issue` — create a new issue
-- `jira_update_issue` — update an existing issue
-- `jira_list_projects` — list projects
-- `jira_list_statuses` — list statuses
+- `jira_search_issues` -- search issues via JQL
+- `jira_get_issue` -- get issue details by key
+- `jira_create_issue` -- create a new issue
+- `jira_update_issue` -- update an existing issue
+- `jira_list_projects` -- list projects
+- `jira_list_statuses` -- list statuses
 
-### GitHub MCP (7 tools)
+### GitHub MCP (10 tools)
 
-- `list_repos` — list org or user repositories
-- `get_repo` — get repository details
-- `search_repos` — search repositories
-- `list_files` — list files in a directory
-- `read_file` — read file content by path
-- `create_file` — create a new file with commit
-- `update_file` — update existing file (requires SHA)
-- `delete_file` — delete a file (requires SHA)
+- `list_repos` -- list org or user repositories
+- `get_repo` -- get repository details
+- `search_repos` -- search repositories
+- `list_files` -- list files in a directory
+- `read_file` -- read file content by path
+- `create_file` -- create a new file with commit
+- `update_file` -- update existing file (requires SHA)
+- `delete_file` -- delete a file (requires SHA)
+- `list_branches` -- list repository branches
+- `create_branch` -- create a new branch
 
 ## Project Structure
 
@@ -61,6 +63,13 @@ opencode-tools/
   setup.sh                 # One-shot install
   .env.example             # Credential template
 ```
+
+## Security Notes
+
+- Never commit `.env` files or any files containing secrets
+- Use fine-grained GitHub tokens with minimal scopes
+- Use Atlassian Legacy tokens (not scoped tokens) for Basic Auth
+- Set file permissions on `.env` to `600` (owner read/write only)
 
 ## License
 
