@@ -1,10 +1,10 @@
 # OpenCode Tools
 
-MCP servers for OpenCode (formerly opencode-dev/opencode) that provide access to **GitHub** and **Atlassian** (Confluence + Jira).
+MCP servers for OpenCode (formerly opencode-dev/opencode) that provide access to **GitHub**, **Atlassian** (Confluence + Jira), and **Google** (Drive + Gmail + Calendar).
 
 ## Features
 
-- **23 tools** across 2 MCP servers (13 Atlassian, 10 GitHub)
+- **32 tools** across 3 MCP servers (13 Atlassian, 10 GitHub, 9 Google)
 - **Private by design** -- secrets stored in a local env file, never committed
 - **Global installation** -- one config entry, available across all projects
 - **Zero external dependencies** -- uses only Python stdlib + `mcp` + `requests`
@@ -53,12 +53,30 @@ See the full how-to guide: https://pshapoval.atlassian.net/wiki/spaces/KB/pages/
 - `list_branches` -- list repository branches
 - `create_branch` -- create a new branch
 
+### Google MCP (9 tools)
+
+**Drive** (3 tools):
+- `google_drive_list_files` -- list files in a Drive folder
+- `google_drive_read_file` -- read text file content
+- `google_drive_create_file` -- create a new file
+
+**Gmail** (3 tools):
+- `google_gmail_search` -- search messages by query
+- `google_gmail_read` -- read a message by ID
+- `google_gmail_send` -- send an email
+
+**Calendar** (3 tools):
+- `google_calendar_list_events` -- list calendar events
+- `google_calendar_create_event` -- create a new event
+- `google_calendar_update_event` -- update an existing event
+
 ## Project Structure
 
 ```
 opencode-tools/
   atlassian_mcp_server.py  # Confluence + Jira tools
   github_mcp_server.py     # GitHub tools
+  google_mcp_server.py     # Google Drive + Gmail + Calendar tools
   .opencode/skills/        # Agent skill docs
   setup.sh                 # One-shot install
   .env.example             # Credential template

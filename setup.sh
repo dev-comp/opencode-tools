@@ -4,32 +4,28 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "=== OpenCode Tools Setup ==="
-echo "Installs MCP servers for GitHub and Atlassian (Confluence + Jira)"
+echo "Installs MCP servers for GitHub, Atlassian (Confluence + Jira), and Google"
 echo ""
 
-# Check Python
 if ! command -v python3 &>/dev/null; then
     echo "ERROR: python3 not found"
     exit 1
 fi
 
-# Create venv if not exists
 if [ ! -d "$SCRIPT_DIR/.venv" ]; then
     echo "Creating virtual environment..."
     python3 -m venv "$SCRIPT_DIR/.venv"
 fi
 
 echo "Installing dependencies..."
-"$SCRIPT_DIR/.venv/bin/pip" install -q mcp requests
+"$SCRIPT_DIR/.venv/bin/pip" install -q mcp requests google-api-python-client google-auth-httplib2 google-auth-oauthlib
 
-# Check if .env exists
 if [ ! -f "$SCRIPT_DIR/.env" ]; then
     echo ""
     echo "WARNING: .env not found. Copy .env.example and fill in your credentials:"
     echo "  cp .env.example .env"
 fi
 
-# Test both servers
 echo ""
 echo "Testing Atlassian MCP server..."
 (
@@ -49,6 +45,13 @@ echo "Testing GitHub MCP server..."
 )
 
 echo ""
+echo "Testing Google MCP server..."
+(
+    export GOOGLE_CREDENTIALS="/tmp/nonexistent.json"
+    timeout 3 "$SCRIPT_DIR/.venv/bin/python3" "$SCRIPT_DIR/google_mcp_server.py" 2>&1 || true
+)
+
+echo ""
 echo "=== Servers Ready ==="
 echo ""
 echo "Atlassian tools (13):"
@@ -58,14 +61,16 @@ echo "  confluence_get_space, jira_search_issues, jira_get_issue"
 echo "  jira_create_issue, jira_update_issue, jira_list_projects"
 echo "  jira_list_statuses"
 echo ""
-echo "GitHub tools (21):"
+echo "GitHub tools (10):"
 echo "  list_repos, get_repo, search_repos"
 echo "  list_files, read_file, create_file, update_file, delete_file"
 echo "  list_branches, create_branch"
-echo "  list_issues, get_issue, create_issue, update_issue"
-echo "  list_issue_comments, add_comment"
-echo "  list_pull_requests, get_pull_request, merge_pull_request"
-echo "  list_pr_comments, create_pull_request"
+echo ""
+echo "Google tools (9):"
+echo "  google_drive_list_files, google_drive_read_file, google_drive_create_file"
+echo "  google_gmail_search, google_gmail_read, google_gmail_send"
+echo "  google_calendar_list_events, google_calendar_create_event"
+echo "  google_calendar_update_event"
 echo ""
 echo "Add to your OpenCode config (~/.config/opencode/config.json):"
 echo ""
@@ -77,5 +82,9 @@ echo '    },'
 echo '    "github": {'
 echo '      "type": "local",'
 echo "      \"command\": [\"python3\", \"$SCRIPT_DIR/.venv/bin/python3\", \"$SCRIPT_DIR/github_mcp_server.py\"]"
+echo '    },'
+echo '    "google": {'
+echo '      "type": "local",'
+echo "      \"command\": [\"python3\", \"$SCRIPT_DIR/.venv/bin/python3\", \"$SCRIPT_DIR/google_mcp_server.py\"]"
 echo '    }'
 echo '  }'
