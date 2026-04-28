@@ -21,6 +21,9 @@ import os
 import sys
 from urllib.parse import urljoin, urlparse
 
+from dotenv import load_dotenv
+load_dotenv("/home/ikka/.config/opencode/.env", override=True)
+
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("Atlassian", json_response=True)
@@ -368,7 +371,7 @@ def jira_search_issues(
         return json.dumps({"error": "Jira not configured. Set JIRA_BASE_URL and JIRA_API_TOKEN."})
 
     base_url, email, token = config
-    path = "/rest/api/3/search/jira"
+    path = "/rest/api/2/search"
     params = {
         "jql": jql,
         "maxResults": min(limit, 100),
@@ -377,7 +380,7 @@ def jira_search_issues(
         params["fields"] = fields
 
     try:
-        data = _make_request(base_url, email, token, "POST", path, json_body={"query": jql}, params=params)
+        data = _make_request(base_url, email, token, "GET", path, params=params)
         results = []
         for issue in data.get("issues", []):
             fields_data = issue.get("fields", {})
@@ -391,6 +394,8 @@ def jira_search_issues(
             })
         return json.dumps(results, indent=2)
     except Exception as e:
+        if "410" in str(e):
+            return json.dumps({"error": "Search API unavailable on Jira Free plan. Create tasks and retrieve by key instead.", "workaround": "Create tasks via jira_create_issue, then retrieve via jira_get_issue"})
         return json.dumps({"error": str(e)})
 
 
@@ -413,7 +418,7 @@ def jira_get_issue(
         return json.dumps({"error": "Jira not configured."})
 
     base_url, email, token = config
-    path = f"/rest/api/3/issue/{issue_key}"
+    path = f"/rest/api/2/issue/{issue_key}"
     params = {}
     if fields:
         params["fields"] = fields
@@ -454,7 +459,7 @@ def jira_create_issue(
         return json.dumps({"error": "Jira not configured."})
 
     base_url, email, token = config
-    path = "/rest/api/3/issue"
+    path = "/rest/api/2/issue"
     fields: dict = {
         "project": {"key": project_key},
         "summary": summary,
@@ -509,7 +514,7 @@ def jira_update_issue(
         return json.dumps({"error": "Jira not configured."})
 
     base_url, email, token = config
-    path = f"/rest/api/3/issue/{issue_key}"
+    path = f"/rest/api/2/issue/{issue_key}"
     fields: dict = {}
     if summary is not None:
         fields["summary"] = summary
@@ -549,12 +554,13 @@ def jira_list_projects(
         return json.dumps({"error": "Jira not configured."})
 
     base_url, email, token = config
-    path = "/rest/api/3/project"
+    path = "/rest/api/2/project"
     params = {"maxResults": min(limit, 100)}
     try:
         data = _make_request(base_url, email, token, "GET", path, params=params)
+        projects = data.get("values", []) if isinstance(data, dict) else data
         results = []
-        for project in data.get("values", []):
+        for project in projects:
             results.append({
                 "key": project.get("key"),
                 "name": project.get("name", ""),
@@ -578,11 +584,12 @@ def jira_list_statuses() -> str:
         return json.dumps({"error": "Jira not configured."})
 
     base_url, email, token = config
-    path = "/rest/api/3/status"
+    path = "/rest/api/2/status"
     try:
         data = _make_request(base_url, email, token, "GET", path)
+        statuses = data.get("statuses", []) if isinstance(data, dict) else data
         results = []
-        for status in data.get("statuses", []):
+        for status in statuses:
             results.append({
                 "id": status.get("id"),
                 "name": status.get("name", ""),
@@ -593,6 +600,8 @@ def jira_list_statuses() -> str:
         return json.dumps({"error": str(e)})
 
 
+# ---------------------------------------------------------------------------
+# Entry point
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
